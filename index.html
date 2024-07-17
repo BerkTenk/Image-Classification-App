@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Classification with TensorFlow.js</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+</head>
+<body>
+  <h1>Image Classification with TensorFlow.js</h1>
+  <input type="file" id="imageUpload">
+  <img id="uploadedImage" src="" alt="Uploaded Image" style="display:none;">
+  <p id="result"></p>
+  <script>
+
+  let model;
+  async function loadModel() {
+    model = await mobilenet.load();
+    console.log("Model loaded.");
+  }
+
+  loadModel();
+
+
+  const imageUpload = document.getElementById('imageUpload');
+  imageUpload.addEventListener('change', handleImageUpload);
+
+  async function handleImageUpload(event) {
+    const file = event.target.files[0];
+    const imageElement = document.getElementById('uploadedImage');
+    const resultElement = document.getElementById('result');
+
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      imageElement.src = e.target.result;
+      imageElement.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+
+
+    reader.onloadend = async function() {
+      const predictions = await model.classify(imageElement);
+      console.log(predictions);
+
+
+      resultElement.innerHTML = predictions.map(p => `${p.className}: ${p.probability.toFixed(4)}`).join('<br>');
+    };
+  }
+  </script>
+</body>
+</html>
